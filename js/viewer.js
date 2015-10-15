@@ -121,7 +121,7 @@ function viewAll() {
 }
 
 function init() {
-	container = document.createElement('div');
+	container = document.getElementById('3d-container');
 	document.body.appendChild(container);
 
 	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10);
