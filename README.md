@@ -2,9 +2,9 @@
 
 Install in your bower project using:
 
-  bower install codarchlab/3dviewer --save
+    bower install codarchlab/3dviewer --save
 
 Build with gulp:
 
-  npm install
-  gulp
+    npm install
+    gulp
