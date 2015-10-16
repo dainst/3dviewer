@@ -200,32 +200,33 @@ var _3dviewer = function(options) {
 				var materialUrl =  options.backendUri + '/model/material/' + id;
 
 				// get meta data
-				// TODO use async request
 				var request = new XMLHttpRequest();
-				request.open('get', modelUrl + '?meta=true', false);
+				request.open('get', modelUrl + '?meta=true');
 				request.send();
 
-				if (request.status === 200) {
-					response = JSON.parse(request.responseText);
-					// show meta info
-					var modelTitle = response.title;
-					var entityLink = response.connectedEntity;
-					if (modelTitle) {
-						var title = document.getElementById('title');
-						title.innerHTML = modelTitle;
-						if (entityLink) {
-							title.innerHTML = modelTitle + '(<a href="' + options.frontendUri + '/entity/' + entityLink + '" target="_blank">' + entityLink + '</a>)';
+				request.onreadystatechange = function() {
+					if (request.readyState == 4 && request.status === 200) {
+						response = JSON.parse(request.responseText);
+						// show meta info
+						var modelTitle = response.title;
+						var entityLink = response.connectedEntity;
+						if (modelTitle) {
+							var title = document.getElementById('title');
+							title.innerHTML = modelTitle;
+							if (entityLink) {
+								title.innerHTML = modelTitle + '(<a href="' + options.frontendUri + '/entity/' + entityLink + '" target="_blank">' + entityLink + '</a>)';
+							}
 						}
+						document.getElementById('data').innerHTML = '<b>Modeller: </b>' + response.modeller + '<br/>' + '<b>License: </b>' + response.license;
+
+						// loading manager
+						manager = new THREE.LoadingManager();
+						/*manager.onProgress = function(item, loaded, total) {
+						 console.log(item, loaded, total);
+						 };*/
+
+						loadModel(response.format, modelUrl, materialUrl);
 					}
-					document.getElementById('data').innerHTML = '<b>Modeller: </b>' + response.modeller + '<br/>' + '<b>License: </b>' + response.license;
-
-					// loading manager
-					manager = new THREE.LoadingManager();
-					/*manager.onProgress = function(item, loaded, total) {
-					 console.log(item, loaded, total);
-					 };*/
-
-					loadModel(response.format, modelUrl, materialUrl);
 				}
 
 				initScene();
