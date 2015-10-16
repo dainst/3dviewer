@@ -36,9 +36,9 @@ var _3dviewer = function(options) {
 	var helpTextChanged = false;
 	var clock = new THREE.Clock();
 
-	var trackballHelpText = '<table cellspacing="10">' + '<tr><td>Left mouse button</td><td>=</td><td>Move camera</td></tr>' + '<tr><td>Right mouse button</td><td>=</td><td>Move camera target</td></tr>' + '<tr><td>Mouse wheel/Middle mouse button</td><td>=</td><td>Zoom</td></tr>' + '<tr><td>H</td><td>=</td><td>Hide/Unhide Controls</td></tr></table>';
+	var trackballHelpText = '<table cellspacing="10">' + '<tr><td>Left mouse button</td><td>=</td><td>Move camera</td></tr>' + '<tr><td>Right mouse button</td><td>=</td><td>Move camera target</td></tr>' + '</table>';
 
-	var flyHelpText = '<table cellspacing="10">' + '<tr><td>Mouse pointer</td><td>=</td><td>Look</td></tr>' + '<tr><td>Left mouse button/W/Up</td><td>=</td><td>Move forward</td></tr>' + '<tr><td>Right mouse button/S/Down</td><td>=</td><td>Move backward</td></tr>' + '<tr><td>+</td><td>=</td><td>Increase move speed</td></tr>' + '<tr><td>-</td><td>=</td><td>Decrease move speed</td></tr>' + '<tr><td>A/Left</td><td>=</td><td>Strafe left</td></tr>' + '<tr><td>D/Right</td><td>=</td><td>Strafe right</td></tr>' + '<tr><td>R</td><td>=</td><td>Fly up</td></tr>' + '<tr><td>F</td><td>=</td><td>Fly down</td></tr>' + '<tr><td>Q</td><td>=</td><td>Freeze/Unfreeze camera</td></tr>' + '<tr><td>H</td><td>=</td><td>Hide/Unhide Controls</td></tr></table>';
+	var flyHelpText = '<table cellspacing="10">' + '<tr><td>Mouse pointer</td><td>=</td><td>Look</td></tr>' + '<tr><td>Left mouse button/W/Up</td><td>=</td><td>Move forward</td></tr>' + '<tr><td>Right mouse button/S/Down</td><td>=</td><td>Move backward</td></tr>' + '<tr><td>+</td><td>=</td><td>Increase move speed</td></tr>' + '<tr><td>-</td><td>=</td><td>Decrease move speed</td></tr>' + '<tr><td>A/Left</td><td>=</td><td>Strafe left</td></tr>' + '<tr><td>D/Right</td><td>=</td><td>Strafe right</td></tr>' + '<tr><td>R</td><td>=</td><td>Fly up</td></tr>' + '<tr><td>F</td><td>=</td><td>Fly down</td></tr>' + '<tr><td>Q</td><td>=</td><td>Freeze/Unfreeze camera</td></tr>' + '</table>';
 
 	var loaderOnProgress = function(xhr) {
 		if (xhr.lengthComputable) {
@@ -279,7 +279,10 @@ var _3dviewer = function(options) {
 			Help : true
 		}
 
-		var gui = new dat.GUI();
+		var gui = new dat.GUI({ autoPlace: false });
+		var guiContainer = document.getElementById('gui');
+		guiContainer.appendChild(gui.domElement);
+
 		var changeController = function() {
 			// Controller
 			cameraControls.removeEventHandlers();
