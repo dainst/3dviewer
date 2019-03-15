@@ -1,8 +1,8 @@
 # Arachne 3D-Viewer
 
-Install in your bower project using:
+Install in your npm project using:
 
-    bower install codarchlab/3dviewer --save
+    npm install idai-3d-viewer --save
 
 Build with gulp:
 

@@ -1,10 +1,10 @@
 {
-  "name": "3dviewer",
-  "version": "1.0.1",
+  "name": "idai-3dviewer",
+  "version": "1.0.2",
   "main": "gulpfile.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/codarchlab/3dviewer.git"
+    "url": "git+https://github.com/dainst/3dviewer.git"
   },
   "license": "MIT",
   "devDependencies": {
