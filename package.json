@@ -7,9 +7,13 @@
     "url": "git+https://github.com/dainst/3dviewer.git"
   },
   "license": "MIT",
+  "scripts": {
+    "start": "gulp server"
+  },
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",
+    "gulp-connect": "^5.7.0",
     "gulp-uglify": "^1.4.2"
   }
 }

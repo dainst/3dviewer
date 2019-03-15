@@ -1,12 +1,18 @@
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
+var connect = require('gulp-connect');
 
 var pkg = require('./package.json');
 
 var paths = {
 	'build': 'dist/'
 }
+
+// starts a webserver for development
+gulp.task('server', function() {
+	connect.server();
+});
 
 // concatenates all js files in src into a single file in build dir
 gulp.task('concat-js', function() {
