@@ -8,3 +8,7 @@ Build with gulp:
 
     npm install
     gulp
+
+Run viewer locally for development with:
+
+    npm start
