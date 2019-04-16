@@ -23,7 +23,7 @@ var _3dviewer = function(options) {
 		options.backendUri = "http://arachne.dainst.org/data";
 	if(!options.hasOwnProperty('frontendUri'))
 		options.frontendUri = "http://arachne.dainst.org";
-	
+
 	if (!Detector.webgl)
 		Detector.addGetWebGLMessage();
 
@@ -48,7 +48,8 @@ var _3dviewer = function(options) {
 		}
 	};
 
-	var loaderOnError = function(xhr) {
+	var loaderOnError = function(error) {
+        console.log(error);
 	};
 
 	if (init()) {
@@ -57,27 +58,41 @@ var _3dviewer = function(options) {
 
 	function loadModel(format, modelUrl, materialUrl) {
 		if (manager) {
-			var onLoad = function(object) {
-				scene.add(object);
+			var onLoad = function(event) {
+				scene.add(event.detail.loaderRootNode);
 				viewAll();
 				cl.hide();
 				var progress = document.getElementById(options.progressId);
 				progress.innerHTML = '';
 			}
-			var loader;
 			switch(response.format) {
 			case 'obj':
-				loader = new THREE.OBJLoader(manager);
-				loader.load(modelUrl, onLoad, loaderOnProgress, loaderOnError);
+				new THREE.OBJLoader2()
+                    .load(modelUrl, onLoad, loaderOnProgress, loaderOnError, null, false);
 				break;
 			case 'objmtl':
-				loader = new THREE.OBJMTLLoader(manager);
-				loader.crossOrigin = '';
-				loader.load(modelUrl, materialUrl, onLoad, loaderOnProgress, loaderOnError);
+                var loader = new THREE.OBJLoader2();
+                var onLoadMtl = function(materials) {
+                    loader.setMaterials(materials);
+                    loader.load(modelUrl, onLoad, loaderOnProgress, loaderOnError);
+                }
+                loader.setResourcePath( materialUrl + '/' );
+                loader.loadMtl(materialUrl, null, onLoadMtl, null, null, '');
 				break;
-			case 'stl':
-				loader = new THREE.STLLoader(manager);
-				loader.load(modelUrl, onLoad, loaderOnProgress, loaderOnError);
+            // code for using old OBJLoader
+            // TODO: delete when decision to use OBJLoader2 is final
+			case 'objmtl_old':
+				new THREE.MTLLoader()
+                    .setCrossOrigin('')
+                    .setResourcePath( materialUrl + '/' )
+                    .setMaterialOptions({ 'side': THREE.DoubleSide })
+                    .load(materialUrl, function(materials) {
+                        materials.preload();
+                        new THREE.OBJLoader()
+                            .setMaterials(materials)
+                            .load(modelUrl, onLoad, loaderOnProgress, loaderOnError);
+                    });
+				break;
 			}
 		}
 	}
