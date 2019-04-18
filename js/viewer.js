@@ -79,20 +79,18 @@ var _3dviewer = function(options) {
                 loader.setResourcePath( materialUrl + '/' );
                 loader.loadMtl(materialUrl, null, onLoadMtl, null, null, '');
 				break;
-            // code for using old OBJLoader
-            // TODO: delete when decision to use OBJLoader2 is final
-			case 'objmtl_old':
-				new THREE.MTLLoader()
-                    .setCrossOrigin('')
-                    .setResourcePath( materialUrl + '/' )
-                    .setMaterialOptions({ 'side': THREE.DoubleSide })
-                    .load(materialUrl, function(materials) {
-                        materials.preload();
-                        new THREE.OBJLoader()
-                            .setMaterials(materials)
-                            .load(modelUrl, onLoad, loaderOnProgress, loaderOnError);
-                    });
-				break;
+			case 'dae':
+				var dae, loader = new THREE.ColladaLoader();
+				loader.load( modelUrl, function ( collada ) {
+					dae = collada.scene;
+					scene.add(dae);
+					viewAll();
+					cl.hide();
+					var progress = document.getElementById(options.progressId);
+					progress.innerHTML = '';
+				}, loaderOnProgress, loaderOnError);
+			break;
+
 			}
 		}
 	}
@@ -211,12 +209,11 @@ var _3dviewer = function(options) {
 				cl.show();
 				// Hidden by default
 
-				var modelUrl = options.backendUri + '/model/' + id;
 				var materialUrl =  options.backendUri + '/model/material/' + id;
-
+				var metaUrl = options.backendUri + '/model/meta/' + id;
 				// get meta data
 				var request = new XMLHttpRequest();
-				request.open('get', modelUrl + '?meta=true');
+				request.open('get', metaUrl);
 				request.send();
 
 				request.onreadystatechange = function() {
@@ -224,6 +221,7 @@ var _3dviewer = function(options) {
 						response = JSON.parse(request.responseText);
 						// show meta info
 						var modelTitle = response.title;
+						var modelUrl = options.backendUri + '/model/file' + response.path + '/' + response.fileName ;
 						var entityLink = response.connectedEntity;
 						if (modelTitle) {
 							var title = document.getElementById('title');
