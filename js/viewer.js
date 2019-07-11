@@ -9,6 +9,7 @@
  *
  * @author: Reimar Grabowski
  * @author: Sebastian Cuy
+ * @author: Sven Linßen
  */
 var _3dviewer = function(options) {
 
@@ -35,6 +36,7 @@ var _3dviewer = function(options) {
 	var fpsControls = false;
 	var helpTextChanged = false;
 	var clock = new THREE.Clock();
+	var modelType = null;
 
 	var trackballHelpText = '<table cellspacing="10">' + '<tr><td>Left mouse button</td><td>=</td><td>Move camera</td></tr>' + '<tr><td>Right mouse button</td><td>=</td><td>Move camera target</td></tr>' + '</table>';
 
@@ -59,11 +61,17 @@ var _3dviewer = function(options) {
 	function loadModel(format, modelUrl, materialUrl) {
 		if (manager) {
 			var onLoad = function(event) {
+				/*event.detail.loaderRootNode.traverse(function(child) {
+					if(child instanceof THREE.Mesh) {
+						var tempGeo = new THREE.Geometry().fromBufferGeometry(child.geometry);
+						tempGeo.mergeVertices();
+						tempGeo.computeVertexNormals();
+						tempGeo.computeFaceNormals();
+						child.geometry = new THREE.BufferGeometry().fromGeometry( tempGeo );
+					}
+				});*/
 				scene.add(event.detail.loaderRootNode);
-				viewAll();
-				cl.hide();
-				var progress = document.getElementById(options.progressId);
-				progress.innerHTML = '';
+				prepareView();
 			}
 			switch(response.format) {
 			case 'obj':
@@ -71,28 +79,98 @@ var _3dviewer = function(options) {
                     .load(modelUrl, onLoad, loaderOnProgress, loaderOnError, null, false);
 				break;
 			case 'objmtl':
-                var loader = new THREE.OBJLoader2();
-                var onLoadMtl = function(materials) {
-                    loader.setMaterials(materials);
-                    loader.load(modelUrl, onLoad, loaderOnProgress, loaderOnError);
-                }
-                loader.setResourcePath( materialUrl + '/' );
-                loader.loadMtl(materialUrl, null, onLoadMtl, null, null, '');
+                objmtlLoader(modelUrl, onLoad, loaderOnProgress, loaderOnError);
 				break;
 			case 'dae':
-				var dae, loader = new THREE.ColladaLoader();
-				loader.load( modelUrl, function ( collada ) {
-					dae = collada.scene;
-					scene.add(dae);
-					viewAll();
-					cl.hide();
-					var progress = document.getElementById(options.progressId);
-					progress.innerHTML = '';
-				}, loaderOnProgress, loaderOnError);
-			break;
-
+				daeLoader(modelUrl, loaderOnProgress, loaderOnError);
+				break;
+			case 'glb':
+			case 'gltf':
+				gltfLoader(modelUrl, loaderOnProgress, loaderOnError);
+				break;
 			}
 		}
+	}
+
+	function prepareView(){
+		viewAll();
+		cl.hide();
+		var progress = document.getElementById(options.progressId);
+		progress.innerHTML = '';
+	}
+
+	function viewAll() {
+		computeSceneBoundingSphere();
+		var halfFovInRad = 0.5 * (45 * Math.PI / 180);
+		// fovy
+		if (window.innerWidth < window.innerHeight) {
+			var halfFovInRad = Math.atan((window.innerWidth / window.innerHeight) * Math.tan(halfFovInRad));
+			// fovx
+		}
+		var zDistance = sceneCenter.z + sceneRadius / Math.sin(halfFovInRad);
+		camera.position.set(sceneCenter.x, sceneCenter.y, zDistance);
+		camera.near = sceneRadius / 1000;
+		camera.far = sceneRadius * 100;
+		camera.updateProjectionMatrix();
+
+		if (cameraControls) {
+			cameraControls.target.copy(sceneCenter);
+		}
+	}
+
+	function objmtlLoader(modelUrl, onLoad, loaderOnProgress, loaderOnError){
+		var loader = new THREE.OBJLoader2();
+		var onLoadMtl = function(materials) {
+			loader.setMaterials(materials);
+			loader.load(modelUrl, onLoad, loaderOnProgress, loaderOnError);
+		}
+		loader.setResourcePath( materialUrl + '/' );
+		loader.loadMtl(materialUrl, null, onLoadMtl, null, null, '');
+
+		viewAll();
+	}
+
+	function daeLoader(modelUrl, loaderOnProgress, loaderOnError){
+		var dae, loader = new THREE.ColladaLoader();
+		loader.load( modelUrl, function ( collada ) {
+			dae = collada.scene;
+
+			dae.traverse(function(child) {
+				if(child instanceof THREE.Mesh) {
+					var tempGeo = new THREE.Geometry().fromBufferGeometry(child.geometry);
+					tempGeo.mergeVertices();
+					tempGeo.computeVertexNormals();
+					tempGeo.computeFaceNormals();
+					child.geometry = new THREE.BufferGeometry().fromGeometry( tempGeo );
+				}
+			});
+			scene.add(dae);
+			prepareView();
+		}, loaderOnProgress, loaderOnError);
+	}
+
+	function gltfLoader(modelUrl, loaderOnProgress, loaderOnError){
+		var loader = new THREE.GLTFLoader();
+
+		// Optional: Provide a DRACOLoader instance to decode compressed mesh data
+		THREE.DRACOLoader.setDecoderPath( '/js/libs/draco' );
+		loader.setDRACOLoader( new THREE.DRACOLoader() );
+
+		// Optional: Pre-fetch Draco WASM/JS module, to save time while parsing.
+		THREE.DRACOLoader.getDecoderModule();
+
+		loader.load(modelUrl, function ( gltf ) {
+
+				scene.add( gltf.scene );
+
+				gltf.animations; // Array<THREE.AnimationClip>
+				gltf.scene; // THREE.Scene
+				gltf.scenes; // Array<THREE.Scene>
+				gltf.cameras; // Array<THREE.Camera>
+				gltf.asset; // Object
+
+				prepareView();
+			}, loaderOnProgress, loaderOnError);
 	}
 
 	function computeSceneBoundingSphere() {
@@ -140,117 +218,134 @@ var _3dviewer = function(options) {
 
 	}
 
-	function viewAll() {
-		computeSceneBoundingSphere();
-		var halfFovInRad = 0.5 * (45 * Math.PI / 180);
-		// fovy
-		if (window.innerWidth < window.innerHeight) {
-			var halfFovInRad = Math.atan((window.innerWidth / window.innerHeight) * Math.tan(halfFovInRad));
-			// fovx
-		}
-		var zDistance = sceneCenter.z + sceneRadius / Math.sin(halfFovInRad);
-		camera.position.set(sceneCenter.x, sceneCenter.y, zDistance);
-		camera.near = sceneRadius / 1000;
-		camera.far = sceneRadius * 100;
-		camera.updateProjectionMatrix();
-
-		if (cameraControls) {
-			cameraControls.target.copy(sceneCenter);
-		}
-	}
-
 	function init() {
 		container = document.createElement('div');
 		document.getElementById(options.containerId).appendChild(container);
 
 		camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10);
-
-		// scene
 		scene = new THREE.Scene();
-
-		// lights
-		var ambient = new THREE.AmbientLight(0x373737);
-		scene.add(ambient);
-
-		var directional = new THREE.DirectionalLight(0x373737);
-		scene.add(directional);
-
-		camLight = new THREE.PointLight(0x9b9b9b);
-		camLight.position.copy(camera.position.clone());
-		scene.add(camLight);
-		lightYOffset = 1;
 
 		// retrieve meta data
 		id = getIdFromUrl();
-		if (id == null) {
-			initScene();
-			initGUI();
+		if (id != null && isNumeric(id)){
+			canvasLoadingBar();
 
-			window.addEventListener('resize', onWindowResize, false);
-			return true;
-		} else {
-			if (isNumeric(id)) {
-				// add load indicator
-				cl = new CanvasLoader(options.loaderId);
-				cl.setColor('#ffffff');
-				// default is '#000000'
-				cl.setShape('square');
-				// default is 'oval'
-				cl.setDiameter(80);
-				// default is 40
-				cl.setDensity(120);
-				// default is 40
-				cl.setRange(1.1);
-				// default is 1.3
-				cl.setSpeed(2);
-				// default is 2
-				cl.setFPS(25);
-				// default is 24
-				cl.show();
-				// Hidden by default
+			var materialUrl =  options.backendUri + '/model/material/' + id;
+			var metaUrl = options.backendUri + '/model/meta/' + id;
+			// get meta data
 
-				var materialUrl =  options.backendUri + '/model/material/' + id;
-				var metaUrl = options.backendUri + '/model/meta/' + id;
-				// get meta data
-				var request = new XMLHttpRequest();
-				request.open('get', metaUrl);
-				request.send();
+			var request = new XMLHttpRequest();
+			request.open('get', metaUrl);
+			request.send();
 
-				request.onreadystatechange = function() {
-					if (request.readyState == 4 && request.status === 200) {
-						response = JSON.parse(request.responseText);
-						// show meta info
-						var modelTitle = response.title;
-						var modelUrl = options.backendUri + '/model/file' + response.path + '/' + response.fileName ;
-						var entityLink = response.connectedEntity;
-						if (modelTitle) {
-							var title = document.getElementById('title');
-							title.innerHTML = modelTitle;
-							if (entityLink) {
-								title.innerHTML = modelTitle + '(<a href="' + options.frontendUri + '/entity/' + entityLink + '" target="_blank">' + entityLink + '</a>)';
-							}
+			request.onreadystatechange = function() {
+				if (request.readyState == 4 && request.status === 200) {
+					response = JSON.parse(request.responseText);
+					// show meta info
+					var modelTitle = response.title;
+					var modelUrl = options.backendUri + '/model/file' + response.path + '/' + response.fileName ;
+					var entityLink = response.connectedEntity;
+					if (modelTitle) {
+						var title = document.getElementById('title');
+						title.innerHTML = modelTitle;
+						if (entityLink) {
+							title.innerHTML = modelTitle + '(<a href="' + options.frontendUri + '/entity/' + entityLink + '" target="_blank">' + entityLink + '</a>)';
 						}
-						document.getElementById('data').innerHTML = '<b>Modeller: </b>' + response.modeller + '<br/>' + '<b>License: </b>' + response.license;
-
-						// loading manager
-						manager = new THREE.LoadingManager();
-						/*manager.onProgress = function(item, loaded, total) {
-						 console.log(item, loaded, total);
-						 };*/
-
-						loadModel(response.format, modelUrl, materialUrl);
 					}
+					document.getElementById('data').innerHTML = '<b>Modeller: </b>' + response.modeller + '<br/>' + '<b>License: </b>' + response.license;
+
+					lightTypeHandler();
+
+					// loading manager
+					manager = new THREE.LoadingManager();
+					/*manager.onProgress = function(item, loaded, total) {
+					 console.log(item, loaded, total);
+					 };*/
+
+					loadModel(response.format, modelUrl, materialUrl);
 				}
-
-				initScene();
-				initGUI();
-
-				window.addEventListener('resize', onWindowResize, false);
-				return true;
-			} else {
-				return false;
 			}
+		} else return false;
+
+		initScene();
+		initGUI();
+
+		window.addEventListener('resize', onWindowResize, false);
+		return true;
+	}
+
+	function lightTypeHandler() {
+		if (modelType == null){
+			console.log(response.format);
+			if(response.format == 'dae' || response.format == 'objmtl'){
+				modelType = response.format;
+				switch (modelType){
+					case 'dae':
+						console.log("daelight soon to be objectfrontal (type)")
+
+						var ambientLight = new THREE.AmbientLight( 0xffffff, 0.9 );
+						scene.add( ambientLight );
+
+						var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+						directionalLight.position.set( 1, 1, 0 ).normalize();
+						scene.add( directionalLight );
+						break;
+
+					case 'objmtl':
+						console.log("objmtllight soon to be building (type)")
+
+						var ambient = new THREE.AmbientLight(0xffffff, 0.2);
+						scene.add(ambient);
+
+						var directional = new THREE.DirectionalLight(0xffffff, 0.8);
+						scene.add(directional);
+
+						camLight = new THREE.PointLight(0x9b9b9b);
+						camLight.position.copy(camera.position.clone());
+						scene.add(camLight);
+						lightYOffset = 1;
+						break;
+				}
+			} else fallbackLight();
 		}
+	}
+
+	function fallbackLight() {
+			console.log("Fallbacklight")
+			hemiLight = new THREE.AmbientLight( 0xffffff, 0.6 );
+			hemiLight.position.set( 0, 50, 0 );
+			scene.add( hemiLight );
+
+			dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
+			dirLight.position.set( - 1, 1.75, 1 );
+			dirLight.position.multiplyScalar( 30 );
+			scene.add( dirLight );
+
+			camLight = new THREE.PointLight(0x9b9b9b, 0.25, 100, 2);
+			camLight.position.copy(camera.position.clone());
+			scene.add(camLight);
+			lightYOffset = 1;
+	}
+
+	function canvasLoadingBar() {
+		// add load indicator
+		cl = new CanvasLoader(options.loaderId);
+		cl.setColor('#ffffff');
+		// default is '#000000'
+		cl.setShape('square');
+		// default is 'oval'
+		cl.setDiameter(80);
+		// default is 40
+		cl.setDensity(120);
+		// default is 40
+		cl.setRange(1.1);
+		// default is 1.3
+		cl.setSpeed(2);
+		// default is 2
+		cl.setFPS(25);
+		// default is 24
+		cl.show();
+		// Hidden by default
 	}
 
 	function initScene() {
@@ -358,8 +453,10 @@ var _3dviewer = function(options) {
 		requestAnimationFrame(animate);
 		cameraControls.update(clock.getDelta());
 
-		camLight.position.copy(camera.position);
-		camLight.position.y += lightYOffset;
+		if(camLight != null ){
+			camLight.position.copy(camera.position);
+			camLight.position.y += lightYOffset;
+		}
 
 		render();
 	}
