@@ -60,23 +60,24 @@ var _3dviewer = function(options) {
 
     function loadModel(format, modelUrl, materialUrl) {
         if (manager) {
-            var onLoad = function(defaultMaterial) {
-                return function(event){
-                    var defaultMaterial = defaultMaterial;
-                    event.detail.loaderRootNode.traverse(function(child) {
-                        if (child instanceof THREE.Mesh) {
-                            var tempGeo = new THREE.Geometry().fromBufferGeometry(child.geometry);
-                            tempGeo.mergeVertices();
-                            tempGeo.computeVertexNormals();
-                            tempGeo.computeFaceNormals();
-                            child.geometry = new THREE.BufferGeometry().fromGeometry(tempGeo);
-                            if(defaultMaterial = true) defaultMaterial(child);
-                        }
-                    });
-                    scene.add(event.detail.loaderRootNode);
-                    prepareView();
-                };
-            }
+            var onLoad = function(objmtl) {
+                var objmtl = objmtl;
+                return function (event){
+                        event.detail.loaderRootNode.traverse(function(child) {
+                            if (child instanceof THREE.Mesh) {
+                                var tempGeo = new THREE.Geometry().fromBufferGeometry(child.geometry);
+                                tempGeo.mergeVertices();
+                                tempGeo.computeVertexNormals();
+                                tempGeo.computeFaceNormals();
+                                child.geometry = new THREE.BufferGeometry().fromGeometry(tempGeo);
+                                if(objmtl == false) defaultMaterial(child);
+                            }
+                        });
+                        scene.add(event.detail.loaderRootNode);
+                        prepareView();
+                    }
+            };
+
             switch (response.format) {
                 case 'obj':
                     objLoader(modelUrl, onLoad, loaderOnProgress, loaderOnError);
@@ -135,14 +136,14 @@ var _3dviewer = function(options) {
 
     function objLoader(modelUrl, onLoad, loaderOnProgress, loaderOnError) {
         var loader = new THREE.OBJLoader2();
-        loader.load(modelUrl, onLoad(true), loaderOnProgress, loaderOnError, null, false);
+        loader.load(modelUrl, onLoad(false), loaderOnProgress, loaderOnError, null, false);
     }
 
     function objmtlLoader(modelUrl, onLoad, loaderOnProgress, loaderOnError, materialUrl) {
         var loader = new THREE.OBJLoader2();
         var onLoadMtl = function(materials) {
             loader.setMaterials(materials);
-            loader.load(modelUrl, onLoad(false), loaderOnProgress, loaderOnError);
+            loader.load(modelUrl, onLoad(true), loaderOnProgress, loaderOnError);
         }
         loader.setResourcePath(materialUrl + '/');
         loader.loadMtl(materialUrl, null, onLoadMtl, null, null, '');
