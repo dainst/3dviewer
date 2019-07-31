@@ -173,11 +173,9 @@ var _3dviewer = function(options) {
     function gltfLoader(modelUrl, loaderOnProgress, loaderOnError) {
         var loader = new THREE.GLTFLoader();
 
-        // Optional: Provide a DRACOLoader instance to decode compressed mesh data
-        THREE.DRACOLoader.setDecoderPath('/js/libs/draco');
+        THREE.DRACOLoader.setDecoderPath('/js/libs/draco/');
         loader.setDRACOLoader(new THREE.DRACOLoader());
 
-        // Optional: Pre-fetch Draco WASM/JS module, to save time while parsing.
         THREE.DRACOLoader.getDecoderModule();
 
         loader.load(modelUrl, function(gltf) {
@@ -277,11 +275,7 @@ var _3dviewer = function(options) {
 
                     lightTypeHandler();
 
-                    // loading manager
                     manager = new THREE.LoadingManager();
-                    /*manager.onProgress = function(item, loaded, total) {
-                     console.log(item, loaded, total);
-                     };*/
 
                     loadModel(response.format, modelUrl, materialUrl);
                 }
@@ -317,20 +311,6 @@ var _3dviewer = function(options) {
 
     function objlight() {
         console.log("objlight soon to be object (type)")
-
-        /*hemiLight = new THREE.AmbientLight( 0xffffff, 0.6 );
-        hemiLight.position.set( 0, 50, 0 );
-        scene.add( hemiLight );
-
-        directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-        directionalLight.position.set( - 1, 1.75, 1 );
-        directionalLight.position.multiplyScalar( 30 );
-        scene.add( directionalLight );
-
-        camLight = new THREE.PointLight(0x9b9b9b, 0.5, 0, 2);
-        camLight.position.copy(camera.position.clone());
-        scene.add(camLight);
-        lightYOffset = 1;*/
 
         var ambient = new THREE.AmbientLight(0xffffff, 0.6);
         ambient.position.set( 0, 50, 0 );
