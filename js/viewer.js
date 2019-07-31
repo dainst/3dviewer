@@ -346,7 +346,7 @@ var _3dviewer = function(options) {
     }
 
     function fallbackLight() {
-        console.log("The lightning is not adapted to this model. Fallbacklight is enabled")
+        console.log("The lightning is not adapted to this model. Fallbacklight is enabled.")
         hemiLight = new THREE.AmbientLight(0xffffff, 0.6);
         hemiLight.position.set(0, 50, 0);
         scene.add(hemiLight);
