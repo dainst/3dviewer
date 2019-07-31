@@ -291,27 +291,24 @@ var _3dviewer = function(options) {
 
     function lightTypeHandler() {
         if (modelType == null) {
-            console.log(response.format);
-            if (response.format == 'obj' || response.format == 'objmtl' || response.format == 'dae') {
-                modelType = response.format;
+            if (response.modelType == 'object' || response.modelType == 'objectfrontal' || response.modelType == 'building') {
+                modelType = response.modelType;
                 switch (modelType) {
-                    case 'obj':
-                        objlight();
+                    case 'object':
+                        objectLight();
                         break;
-                    case 'dae':
-                        daelight();
+                    case 'objectfrontal':
+                        objectFrontalLight();
                         break;
-                    case 'objmtl':
-                        objmtl();
+                    case 'building':
+                        buildingLight();
                         break;
                 }
             } else fallbackLight();
         }
     }
 
-    function objlight() {
-        console.log("objlight soon to be object (type)")
-
+    function objectLight() {
         var ambient = new THREE.AmbientLight(0xffffff, 0.6);
         ambient.position.set( 0, 50, 0 );
         scene.add(ambient);
@@ -326,9 +323,7 @@ var _3dviewer = function(options) {
         lightYOffset = 1;
     }
 
-    function daelight() {
-        console.log("daelight soon to be objectfrontal (type)")
-
+    function objectFrontalLight() {
         var ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
         scene.add(ambientLight);
 
@@ -337,9 +332,7 @@ var _3dviewer = function(options) {
         scene.add(directionalLight);
     }
 
-    function objmtl() {
-        console.log("objmtllight soon to be building (type)")
-
+    function buildingLight() {
         var ambient = new THREE.AmbientLight(0xffffff, 0.2);
         scene.add(ambient);
 
@@ -353,7 +346,7 @@ var _3dviewer = function(options) {
     }
 
     function fallbackLight() {
-        console.log("Fallbacklight")
+        console.log("The lightning is not adapted to this model. Fallbacklight is enabled")
         hemiLight = new THREE.AmbientLight(0xffffff, 0.6);
         hemiLight.position.set(0, 50, 0);
         scene.add(hemiLight);
@@ -424,8 +417,8 @@ var _3dviewer = function(options) {
         settings = {
             Mode: 'Trackball',
             FPS: false,
-            Info: true,
-            Help: true
+            Info: false,
+            Help: false
         }
 
         var gui = new dat.GUI({
