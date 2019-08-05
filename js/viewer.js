@@ -273,7 +273,7 @@ var _3dviewer = function(options) {
                     }
                     document.getElementById('data').innerHTML = '<b>Modeller: </b>' + response.modeller + '<br/>' + '<b>License: </b>' + response.license;
 
-                    lightTypeHandler();
+                    if (modelType == null) lightTypeHandler();
 
                     manager = new THREE.LoadingManager();
 
@@ -290,22 +290,20 @@ var _3dviewer = function(options) {
     }
 
     function lightTypeHandler() {
-        if (modelType == null) {
-            if (response.modelType == 'object' || response.modelType == 'objectfrontal' || response.modelType == 'building') {
-                modelType = response.modelType;
-                switch (modelType) {
-                    case 'object':
-                        objectLight();
-                        break;
-                    case 'objectfrontal':
-                        objectFrontalLight();
-                        break;
-                    case 'building':
-                        buildingLight();
-                        break;
-                }
-            } else fallbackLight();
-        }
+        if (response.modelType == 'object' || response.modelType == 'objectfrontal' || response.modelType == 'building') {
+            modelType = response.modelType;
+            switch (modelType) {
+                case 'object':
+                    objectLight();
+                    break;
+                case 'objectfrontal':
+                    objectFrontalLight();
+                    break;
+                case 'building':
+                    buildingLight();
+                    break;
+            }
+        } else fallbackLight();
     }
 
     function objectLight() {
@@ -346,7 +344,7 @@ var _3dviewer = function(options) {
     }
 
     function fallbackLight() {
-        console.log("The lightning is not adapted to this model. Fallbacklight is enabled.")
+        console.log("The lightning is not adapted to this model due to missing modeltype. Fallbacklight is enabled.")
         hemiLight = new THREE.AmbientLight(0xffffff, 0.6);
         hemiLight.position.set(0, 50, 0);
         scene.add(hemiLight);
