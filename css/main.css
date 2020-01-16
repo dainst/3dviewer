@@ -5,8 +5,11 @@ body {
 	padding        : 0;
 	margin		   : 0;
 	color          : #FFFFFF;
-	background     : url('img/3dbackground.jpg');
-    font-family    : 'Source Sans Pro',sans-serif;
+	background     : -webkit-linear-gradient(180deg, rgba(118,143,184,1) 35%, rgba(224,229,237,1) 100%); /* For Safari */
+    background     : -o-linear-gradient(180deg, rgba(118,143,184,1) 35%, rgba(224,229,237,1) 100%); /* For Opera 11.1 to 12.0 */
+    background     : -moz-linear-gradient(180deg, rgba(118,143,184,1) 35%, rgba(224,229,237,1) 100%); /* For Firefox 3.6 to 15 */
+    background     : linear-gradient(180deg, rgba(118,143,184,1) 35%, rgba(224,229,237,1) 100%); /* Standard syntax */
+	font-family    : 'Source Sans Pro',sans-serif;
 	font-size      : 100%;
 }
 
