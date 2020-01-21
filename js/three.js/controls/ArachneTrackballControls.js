@@ -124,7 +124,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 			} else {
 
 				mouseOnBall.z = .5 / length;
-				
+
 			}
 
 		} else if ( length > 1.0 ) {
@@ -536,7 +536,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	}
 
-    // modified 
+    // modified
     this.removeEventHandlers = function() {
         var domElement = this.domElement;
         domElement.removeEventListener('mousedown', mousedown);
@@ -544,11 +544,11 @@ THREE.TrackballControls = function ( object, domElement ) {
         domElement.removeEventListener('DOMMouseScroll', mousewheel); // firefox
         domElement.removeEventListener('touchstart', touchstart);
 	    domElement.removeEventListener('touchend', touchend);
-	    domElement.removeEventListener('touchmove', touchmove);        
-        document.removeEventListener('keydown', keydown);	    
+	    domElement.removeEventListener('touchmove', touchmove);
+        document.removeEventListener('keydown', keydown);
 	    document.removeEventListener('keyup', keyup);
     }
-    // 
+    //
 
 	this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 

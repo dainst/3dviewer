@@ -281,7 +281,6 @@ var _3dviewer = function(options) {
                 }
             }
         } else return false;
-        console.log("init");
         initScene();
         initGUI();
 
@@ -400,8 +399,6 @@ var _3dviewer = function(options) {
         cameraControls.noPan = false;
         cameraControls.staticMoving = false;
         cameraControls.dynamicDampingFactor = 0.25;
-        console.log(cameraControls);
-        console.log(cameraControls.removeEventHandlers);
     }
 
     function initGUI() {
