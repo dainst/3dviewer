@@ -25,11 +25,11 @@ gulp.task('concat-js', function() {
 });
 
 // minifies and concatenates js files in build dir
-gulp.task('minify-js', ['concat-js'], function() {
+gulp.task('minify-js', function() {
 	return gulp.src(paths.build + '/' + pkg.name + '.js')
 		.pipe(uglify())
 		.pipe(concat(pkg.name + '.min.js'))
     	.pipe(gulp.dest(paths.build));
 });
 
-gulp.task('default', ['minify-js']);
+gulp.task('default', gulp.series('concat-js', 'minify-js'));

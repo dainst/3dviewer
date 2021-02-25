@@ -7,7 +7,7 @@ Install in your npm project using:
 Build with gulp:
 
     npm install
-    gulp
+    npm run build
 
 Run viewer locally for development with:
 
