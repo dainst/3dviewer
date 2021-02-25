@@ -1,6 +1,6 @@
 {
   "name": "idai-3dviewer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "gulpfile.js",
   "repository": {
     "type": "git",
