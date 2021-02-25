@@ -1,6 +1,7 @@
 /**
  * 3d model viewer for arachne.
  * Factory function takes the following options:
+ * - modelId: internal id (PS_Modell3dID) of the 3d model, if omitted the id will be read from the browser location
  * - containerId: id attribute of the HTML element that will act as container for the viewer
  * - loaderId: id attribute for the HTML element that will act as container for the loader
  * - progressId: id attribute for the HTML element that will act as container for the loading progress
@@ -13,6 +14,8 @@
 var _3dviewer = function(options) {
 
 	options = typeof options !== 'undefined' ? options : {};
+	if(!options.hasOwnProperty('modelId'))
+		options.modelId = getIdFromUrl();
 	if(!options.hasOwnProperty('containerId'))
 		options.containerId = "3d-container";
 	if(!options.hasOwnProperty('loaderId'))
@@ -183,7 +186,7 @@ var _3dviewer = function(options) {
 		lightYOffset = 1;
 
 		// retrieve meta data
-		id = getIdFromUrl();
+		const id = options.modelId;
 		if (id == null) {
 			initScene();
 			initGUI();
