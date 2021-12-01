@@ -1,7 +1,7 @@
 {
   "name": "idai-3dviewer",
-  "version": "1.0.3",
-  "main": "gulpfile.js",
+  "version": "1.0.4",
+  "main": "dist/idai-3dviewer.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dainst/3dviewer.git"
