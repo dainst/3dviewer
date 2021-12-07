@@ -17,7 +17,6 @@ gulp.task('server', function() {
 // concatenates all js files in src into a single file in build dir
 gulp.task('concat-js', function() {
 	return gulp.src([
-			'js/three.js/**/*.js',
 			'js/libs/**/*.js',
 			'js/viewer.js'])
 		.pipe(concat(pkg.name + '.js'))
